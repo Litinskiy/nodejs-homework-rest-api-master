@@ -1,4 +1,4 @@
-const express = require('express')
+const express = require('express');
 const Joi = require("joi");
 const {
   getContacts,
@@ -7,15 +7,17 @@ const {
   updateContactById,
   deleteContactById,
   setFavorite,
-} = require("../../controllers/contacts-controller");
+} = require("../../controllers/contactsController");
+const { authMiddleware } = require("../../middlwares/authMiddlware");
 
 
 const addContactSchema = Joi.object({
-  name: Joi.string().required(),
+  name: Joi.string(),
   email: Joi.string()
     .email({ tlds: { deny: ["ru"] } })
     .required(),
   phone: Joi.string().required(),
+  favorite: Joi.boolean(),
 });
 
 const updateContactSchema = Joi.object({
@@ -42,16 +44,30 @@ const validator = (schema) => (req, res, next) => {
 
 const router = express.Router();
 
-router.get('/', getContacts);
+router.get('/',
+  authMiddleware,
+  getContacts);
 
-router.get('/:contactId', getById);
+router.get('/:contactId',
+  getById);
 
-router.post('/', validator(addContactSchema), createContact);
+router.post('/',
+  validator(addContactSchema),
+  authMiddleware,
+  createContact);
 
-router.delete('/:contactId', deleteContactById);
+router.delete('/:contactId',
+  authMiddleware,
+  deleteContactById);
 
-router.put('/:contactId', validator(updateContactSchema), updateContactById);
+router.put('/:contactId',
+  validator(updateContactSchema),
+  authMiddleware,
+  updateContactById);
 
-router.patch('/:contactId/favorite', validator(updateFavoriteSchema), setFavorite);
+router.patch('/:contactId/favorite',
+  validator(updateFavoriteSchema),
+  authMiddleware,
+  setFavorite);
 
 module.exports = router;
