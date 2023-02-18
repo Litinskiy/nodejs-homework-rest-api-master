@@ -1,5 +1,5 @@
 const express = require("express");
-const Joi = require("joi");
+const { registerAndLoginSchema } = require("../../services/schema");
 const {
     register,
     login,
@@ -10,10 +10,7 @@ const {
 
 const { authMiddleware } = require("../../middlwares/authMiddlware");
 
-const registerAndLoginSchema = Joi.object({
-  email: Joi.string().email({ tlds: { deny: ["ru"] } }),
-  password: Joi.string().required().min(4),
-});
+
 
 const validator = (schema) => (req, res, next) => {
   const body = req.body;

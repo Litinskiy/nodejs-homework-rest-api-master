@@ -49,6 +49,7 @@ router.get('/',
   getContacts);
 
 router.get('/:contactId',
+  authMiddleware,
   getById);
 
 router.post('/',
@@ -61,13 +62,13 @@ router.delete('/:contactId',
   deleteContactById);
 
 router.put('/:contactId',
-  validator(updateContactSchema),
   authMiddleware,
+  validator(updateContactSchema),
   updateContactById);
 
 router.patch('/:contactId/favorite',
-  validator(updateFavoriteSchema),
   authMiddleware,
+  validator(updateFavoriteSchema),
   setFavorite);
 
 module.exports = router;
