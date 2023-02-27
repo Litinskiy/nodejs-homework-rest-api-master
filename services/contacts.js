@@ -1,6 +1,7 @@
 const Contact = require("./contactsModel");
 
 const listContacts = async (isFavoriteRequest) => {
+  
   if (isFavoriteRequest) {
     const favContacts = await Contact.find({ favorite: true });
     return favContacts;
