@@ -24,7 +24,6 @@ const getById = async (req, res, next) => {
     }
     res.json(contact);
   } catch(error){
-    console.log(error);
     next(error);
   }
 };
@@ -35,7 +34,6 @@ const createContact = async (req, res, next)=>{
     const newContact = await addContact(req.body);
     res.status(201).json(newContact);
   } catch(error){
-    console.log(error);
     next(error);
   }
 };
@@ -51,7 +49,6 @@ const updateContactById = async (req, res, next)=>{
     ? res.status(200).json(updateContact)
     : res.status(404).json({message: "Not found"});
   } catch(error){
-    console.log(error);
     next(error);
   }
 }
@@ -66,7 +63,6 @@ const deleteContactById = async (req, res, next)=>{
     ? res.status(200).json({message: "Contact deleted"})
     : res.status(404).json({message: "Not found"});
   } catch(error){
-    console.log(error);
     next(error);
   }
 }
@@ -82,7 +78,6 @@ const setFavorite = async (req, res, next)=>{
     ? res.status(200).json(updatedContact)
     : res.status(404).json({message: "Not found"});
   } catch(error){
-    console.log(error);
     next(error);
   }
 }
