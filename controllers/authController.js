@@ -1,5 +1,7 @@
-const { createUser, verifyUser, changeSubStatus, } = require("../services/users");
+const { createUser, verifyUser, updateUserData, } = require("../services/users");
 const User = require("../services/usersModel");
+const Jimp = require("jimp");
+const fs = require("fs").promises;
 
 const register = async (req, res, next) => {
     try {
@@ -8,8 +10,8 @@ const register = async (req, res, next) => {
             user: {
                 email: email,
                 subscription: subscriprtion,
-            }
-        })
+            },
+        });
     } catch (error) {
         if (error.code === 11000) {
             res.status(409).json({ message: "Email in use" });
@@ -41,7 +43,8 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        await User.findByIdAndUpdate(req.user._id, { token: null });
+        const { _id } = req.user;
+        await User.findByIdAndUpdate(_id, { token: null });
         res.status(204).end();
     } catch (error) {
         next(error);
@@ -70,7 +73,7 @@ const updateSubscription = async (req, res, next) => {
                 'Subscription status must be one of following values: ["starter", "pro", "business"]'
             );
         }
-        changeSubStatus(_id, subscription);
+        updateUserData(_id, subscription);
         res
             .status(200)
             .json({ message: "Subscription status has been changed succesfully" });
@@ -79,5 +82,35 @@ const updateSubscription = async (req, res, next) => {
     }
 };
 
+const updateAvatar = async (req, res, next) => {
+    const id = req.user._id;
+    const avatar = req.file.path;
+    const [, fileExtention] = req.file.mimetype.split("/");
+    const uploadsPath = `public/avatars/${id}.${fileExtention}`;
+
+    try {
+        Jimp.read(avatar)
+            .then((avatar) => {
+                return avatar.resize(250, 250).write(uploadsPath);
+            })
+            .catch((error) => {
+                next(error);
+            });
+        
+        await fs.unlink(avatar);
+        await updateUserData(id, { avatarURL: uploadsPath });
+
+        res.status(200).json({ avatarURL: uploadsPath });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
-    register, login, logout, getCurrentUser, updateSubscription };
+    register,
+    login,
+    logout,
+    getCurrentUser,
+    updateSubscription,
+    updateAvatar
+};

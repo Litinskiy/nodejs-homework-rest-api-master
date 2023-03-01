@@ -1,41 +1,42 @@
 const User = require("./usersModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
 
-const createUser = async (body) => {
-    const user = new User(body);
+const createUser = async (userData) => {
+const { email } = userData;    
+const avatarURL = gravatar.url(email);
+const user = new User({ ...userData, avatarURL });
 
-    const hashedPass = bcrypt.hash(body.password, 10)
-        .then((hash) => {
-            return hash;
-        });
-    
-    user.password = await hashedPass;
-    await user.save();
+  const hashedPass = bcrypt.hash(userData.password, 10).then((hash) => {
+    return hash;
+  });
 
-    return user;
+  user.password = await hashedPass;
+  await user.save();
+  return user;
 };
 
-const verifyUser = async (body) => {
-    const user = await User.findOne({ email: body.email });
-    if (!user) {
-        return false;
-    }
+const verifyUser = async (userData) => {
+  const user = await User.findOne({ email: userData.email });
+  if (!user) {
+    return false;
+  }
 
-    const match = await bcrypt.compare(body.password, user.password);
-    if (!match) {
-        return false;
-    }
+  const match = await bcrypt.compare(userData.password, user.password);
+  if (!match) {
+    return false;
+  }
 
-    const token = jwt.sign({ userId: user._id }, process.env.TOKEN_SECRET);
+  const token = jwt.sign({ userId: user._id }, process.env.TOKEN_SECRET);
 
-    await User.findByIdAndUpdate(user._id, { token: token });
-    const updatedUser = await User.findById(user._id);
-    return updatedUser;
+  await User.findByIdAndUpdate(user._id, { token: token });
+  const updatedUser = await User.findById(user._id);
+  return updatedUser;
 };
 
-const changeSubStatus = async (userId, newSubStatus) => {
-    await User.findByIdAndUpdate(userId, { subscription: newSubStatus });
+const updateUserData = async (userId, updateData) => {
+  return await User.findByIdAndUpdate(userId, updateData, { new: true });
 };
 
-module.exports = {createUser, verifyUser, changeSubStatus}; 
+module.exports = { createUser, verifyUser, updateUserData };

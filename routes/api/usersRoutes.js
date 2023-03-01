@@ -6,11 +6,11 @@ const {
     logout,
     getCurrentUser,
     updateSubscription,
+    updateAvatar,
 } = require("../../controllers/authController");
 
 const { authMiddleware } = require("../../middlwares/authMiddlware");
-
-
+const uploads = require("../../middlwares/uploads");
 
 const validator = (schema) => (req, res, next) => {
   const body = req.body;
@@ -30,5 +30,11 @@ router.post("/login", validator(registerAndLoginSchema), login);
 router.get("/logout", authMiddleware, logout);
 router.get("/current", authMiddleware, getCurrentUser);
 router.patch("/subscription", authMiddleware, updateSubscription);
+router.patch(
+  "/avatars",
+  authMiddleware,
+  uploads.single("avatar"),
+  updateAvatar,
+);
 
 module.exports = router;
