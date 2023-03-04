@@ -149,7 +149,7 @@ const repeatEmailVerification = async (req, res, next) => {
         }
         const { verificationToken, verify } = await User.findOne({ email });
         if (verify) {
-            res.status(400).json({ message: "Verification has already been passed" });
+            return res.status(400).json({ message: "Verification has already been passed" });
         }
 
         sendVerificationEmail(email, verificationToken);
