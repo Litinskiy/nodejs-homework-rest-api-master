@@ -7,6 +7,8 @@ const {
     getCurrentUser,
     updateSubscription,
     updateAvatar,
+    emailVerification,
+    repeatEmailVerification,
 } = require("../../controllers/authController");
 
 const { authMiddleware } = require("../../middlwares/authMiddlware");
@@ -26,6 +28,8 @@ const validator = (schema) => (req, res, next) => {
 const router = express.Router();
 
 router.post("/register", validator(registerAndLoginSchema), register);
+router.get("/verify/:verificationToken", emailVerification);
+router.post("/verify", repeatEmailVerification);
 router.post("/login", validator(registerAndLoginSchema), login);
 router.get("/logout", authMiddleware, logout);
 router.get("/current", authMiddleware, getCurrentUser);

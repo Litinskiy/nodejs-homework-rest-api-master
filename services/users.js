@@ -2,6 +2,9 @@ const User = require("./usersModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
+const sgMail = require("@sendgrid/mail");
+require("dotenv").config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const createUser = async (userData) => {
 const { email } = userData;    
@@ -39,4 +42,28 @@ const updateUserData = async (userId, updateData) => {
   return await User.findByIdAndUpdate(userId, updateData, { new: true });
 };
 
-module.exports = { createUser, verifyUser, updateUserData };
+const sendVerificationEmail = async (email, verificationToken) => {
+  const msg = {
+    to: email,
+    from: process.env.VERIFICATION_EMAIL_ADDRESS,
+    subject: "Email verification",
+    text: `http://localhost:${process.env.PORT}/user/verify/${verificationToken}!`,
+    html: `<a href="http://localhost:${process.env.PORT}/api/users/verify/${verificationToken}">Click to verify your email!</a>`,
+  };
+  
+  await sgMail
+    .send(msg)
+    .then((response) => {
+      console.log(response[0].statusCode);
+    })
+    .catch((error) => {
+      console.error("mailing error", error.response.body.errors);
+    });
+};
+
+module.exports = {
+  createUser,
+  verifyUser,
+  updateUserData,
+  sendVerificationEmail
+};
